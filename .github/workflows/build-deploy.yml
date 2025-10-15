@@ -1,0 +1,88 @@
+name: Build and Deploy
+
+# Controla cuándo se ejecuta el workflow
+on:
+  # Ejecuta en pushes a la rama main
+  push:
+    branches: [ main ]
+  # Ejecuta en pull requests dirigidos a main
+  pull_request:
+    branches: [ main ]
+  # Permite ejecutar manualmente desde la pestaña Actions
+  workflow_dispatch:
+
+# Secuencia de jobs que se ejecutarán
+jobs:
+  # Job de build
+  build:
+    # El tipo de runner que ejecutará el job
+    runs-on: ubuntu-latest
+    
+    # Pasos del job
+    steps:
+    # Descarga el código del repositorio
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    # Configura Node.js
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    # Instala dependencias
+    - name: Install dependencies
+      run: npm ci
+      
+    # Ejecuta el build del proyecto
+    - name: Build project
+      run: npm run build
+      
+    # Sube los artefactos del build para usarlos en otros jobs
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist-files
+        path: dist/
+        retention-days: 1
+        
+  # Job de despliegue a GitHub Pages
+  deploy:
+    # Depende del job de build
+    needs: build
+    # Solo se ejecuta en pushes a main, no en PRs
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    
+    # Permisos necesarios para GitHub Pages
+    permissions:
+      pages: write
+      id-token: write
+      
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+      
+    steps:
+    # Descarga los artefactos del build
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: dist-files
+        path: dist
+        
+    # Configura GitHub Pages
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      
+    # Sube los archivos a GitHub Pages
+    - name: Upload to GitHub Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: dist
+        
+    # Despliega a GitHub Pages
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4

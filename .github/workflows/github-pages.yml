@@ -1,0 +1,188 @@
+name: Deploy to GitHub Pages
+
+# Controla cuándo se ejecuta el workflow
+on:
+  # Ejecuta en pushes a la rama main
+  push:
+    branches: [ main ]
+  # Permite ejecutar manualmente
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+
+# Variables de entorno globales
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # Job de build y despliegue
+  build-and-deploy:
+    # El tipo de runner que ejecutará el job
+    runs-on: ubuntu-latest
+    
+    # Permisos necesarios para GitHub Pages
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+      
+    # Configuración del entorno
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+      
+    steps:
+    # Descarga el código del repositorio
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    # Configura Node.js
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    # Instala dependencias
+    - name: Install dependencies
+      run: npm ci
+      
+    # Optimiza imágenes antes del build
+    - name: Optimize images
+      run: |
+        npm install -g imagemin-cli imagemin-mozjpeg imagemin-pngquant
+        mkdir -p dist/assets/img
+        imagemin assets/img/* --out-dir=dist/assets/img --plugin=mozjpeg --plugin=pngquant
+        
+    # Minifica CSS y JS
+    - name: Minify assets
+      run: |
+        npm install -g clean-css-cli terser
+        mkdir -p dist/css dist/js
+        cleancss -o dist/css/style.min.css css/style.css
+        terser js/main.js -o dist/js/main.min.js
+        
+    # Ejecuta el build del proyecto
+    - name: Build project
+      run: npm run build
+      
+    # Reemplaza archivos con versiones optimizadas
+    - name: Replace with optimized assets
+      run: |
+        if [ -f "dist/css/style.min.css" ]; then
+          cp dist/css/style.min.css dist/css/style.css
+        fi
+        if [ -f "dist/js/main.min.js" ]; then
+          cp dist/js/main.min.js dist/js/main.js
+        fi
+        if -d "dist/assets/img" ]; then
+          cp -r dist/assets/img/* dist/assets/
+        fi
+        
+    # Genera sitemap.xml
+    - name: Generate sitemap
+      run: |
+        cat > dist/sitemap.xml << EOF
+        <?xml version="1.0" encoding="UTF-8"?>
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+          <url>
+            <loc>${{ github.event.repository.html_url }}</loc>
+            <lastmod>$(date +%Y-%m-%d)</lastmod>
+            <priority>1.0</priority>
+          </url>
+        </urlset>
+        EOF
+        
+    # Configura GitHub Pages
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      
+    # Sube los archivos a GitHub Pages
+    - name: Upload to GitHub Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: dist
+        
+    # Despliega a GitHub Pages
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+      
+    # Notificación del despliegue
+    - name: Deployment notification
+      run: |
+        echo "🚀 Deployment completed successfully!"
+        echo "📍 Site available at: ${{ steps.deployment.outputs.page_url }}"
+        echo "📊 Check the GitHub Pages tab for deployment status"
+
+  # Job de verificación post-despliegue
+  verify:
+    name: Verify Deployment
+    runs-on: ubuntu-latest
+    needs: build-and-deploy
+    if: success()
+    
+    steps:
+    - name: Wait for deployment
+      run: sleep 30
+      
+    - name: Check site availability
+      run: |
+        SITE_URL="${{ github.event.repository.html_url }}"
+        HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL" || echo "000")
+        if [ "$HTTP_STATUS" -eq 200 ]; then
+          echo "✅ Site is accessible (HTTP $HTTP_STATUS)"
+        else
+          echo "❌ Site is not accessible (HTTP $HTTP_STATUS)"
+          exit 1
+        fi
+        
+    - name: Verify critical files
+      run: |
+        SITE_URL="${{ github.event.repository.html_url }}"
+        FILES=("index.html" "css/style.css" "js/main.js" "config.json")
+        
+        for file in "${FILES[@]}"; do
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL/$file" || echo "000")
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "✅ $file is accessible"
+          else
+            echo "❌ $file is not accessible (HTTP $HTTP_STATUS)"
+          fi
+        done
+        
+    - name: Lighthouse performance check
+      run: |
+        npm install -g @lhci/cli@0.12.x
+        mkdir -p .lighthouseci
+        
+        cat > .lighthouseci/lighthouserc.json << EOF
+        {
+          "ci": {
+            "collect": {
+              "url": ["${{ github.event.repository.html_url }}"],
+              "numberOfRuns": 1
+            },
+            "assert": {
+              "assertions": {
+                "categories:performance": ["warn", {"minScore": 0.8}],
+                "categories:accessibility": ["error", {"minScore": 0.9}],
+                "categories:best-practices": ["warn", {"minScore": 0.8}],
+                "categories:seo": ["warn", {"minScore": 0.8}]
+              }
+            },
+            "upload": {
+              "target": "temporary-public-storage"
+            }
+          }
+        }
+        EOF
+        
+        lhci autorun || true

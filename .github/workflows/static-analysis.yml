@@ -1,0 +1,153 @@
+name: Static Analysis and Code Quality
+
+# Controla cuándo se ejecuta el workflow
+on:
+  # Ejecuta en pushes y pull requests
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  # Permite ejecutar manualmente
+  workflow_dispatch:
+
+jobs:
+  # Job de análisis estático
+  analyze:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Descarga el código
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    # Configura Node.js
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    # Instala dependencias
+    - name: Install dependencies
+      run: npm ci
+      
+    # Verifica sintaxis de archivos HTML
+    - name: Validate HTML
+      run: |
+        find . -name "*.html" -not -path "./node_modules/*" -not -path "./dist/*" | xargs -I {} sh -c 'echo "Validating {}" && npx html-validator --file={} --format=text'
+      continue-on-error: true
+      
+    # Verifica sintaxis de archivos CSS
+    - name: Validate CSS
+      run: |
+        find . -name "*.css" -not -path "./node_modules/*" -not -path "./dist/*" | xargs -I {} sh -c 'echo "Validating {}" && npx stylelint {}'
+      continue-on-error: true
+      
+    # Verifica sintaxis de archivos JavaScript
+    - name: Validate JavaScript
+      run: |
+        find . -name "*.js" -not -path "./node_modules/*" -not -path "./dist/*" | xargs -I {} sh -c 'echo "Validating {}" && npx eslint {}'
+      continue-on-error: true
+      
+    # Verifica validez de JSON
+    - name: Validate JSON
+      run: |
+        find . -name "*.json" -not -path "./node_modules/*" -not -path "./dist/*" | xargs -I {} sh -c 'echo "Validating {}" && python3 -m json.tool {} > /dev/null'
+        
+    # Verifica referencias rotas en HTML
+    - name: Check for broken references
+      run: |
+        npx awesome-ci link-checker --html-files="*.html"
+      continue-on-error: true
+      
+    # Verifica tamaño de imágenes optimizadas
+    - name: Check image optimization
+      run: |
+        echo "Checking image sizes..."
+        find ./assets/img -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" | while read img; do
+          size=$(stat -c%s "$img")
+          echo "$img: $size bytes"
+          if [ "$img" = "./assets/img/hero.jpg" ] && [ $size -gt 350000 ]; then
+            echo "Warning: Hero image should be under 350KB"
+          fi
+        done
+        
+    # Verifica que el build funcione correctamente
+    - name: Test build process
+      run: |
+        npm run build
+        if [ ! -d "dist" ]; then
+          echo "Error: Build directory not created"
+          exit 1
+        fi
+        if [ ! -f "dist/index.html" ]; then
+          echo "Error: index.html not found in dist"
+          exit 1
+        fi
+        
+    # Verifica configuración mínima requerida
+    - name: Validate configuration
+      run: |
+        if [ ! -f "config.json" ]; then
+          echo "Error: config.json not found"
+          exit 1
+        fi
+        
+        # Verifica campos obligatorios en config.json
+        node -e "
+          const config = require('./config.json');
+          const required = ['couple', 'wedding'];
+          for (const field of required) {
+            if (!config[field]) {
+              console.error('Error: Missing required field:', field);
+              process.exit(1);
+            }
+          }
+          console.log('Configuration validation passed');
+        "
+        
+    # Verifica accesibilidad básica
+    - name: Accessibility check
+      run: |
+        npm install -g pa11y-ci
+        npm run build
+        npx http-server dist -p 8000 &
+        sleep 5
+        pa11y-ci --sitemap http://localhost:8000/sitemap.xml || true
+        kill %1
+      continue-on-error: true
+
+  # Job de seguridad
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Descarga el código
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    # Configura Node.js
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    # Instala dependencias
+    - name: Install dependencies
+      run: npm ci
+      
+    # Escaneo de vulnerabilidades
+    - name: Run security audit
+      run: npm audit --audit-level=moderate
+      continue-on-error: true
+      
+    # Verifica archivos sensibles
+    - name: Check for sensitive files
+      run: |
+        echo "Checking for sensitive files..."
+        if grep -r "password\\|secret\\|token\\|key" --include="*.js" --include="*.json" --include="*.html" --exclude-dir=node_modules --exclude-dir=dist .; then
+          echo "Warning: Potential sensitive information found"
+        fi
