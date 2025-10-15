@@ -1,0 +1,15 @@
+{
+  "name": "wedding-invitation-lumen",
+  "version": "1.0.0",
+  "description": "Plantilla de invitación de boda estática - LUMEN",
+  "main": "index.html",
+  "scripts": {
+    "build": "npm run build:copy",
+    "build:copy": "mkdir -p dist && cp -r assets css js index.html 404.html config.json dist/",
+    "serve": "python3 -m http.server 8000",
+    "dev": "npm run serve"
+  },
+  "keywords": ["wedding", "invitation", "static", "minimalist"],
+  "author": "EXO Digital Studio",
+  "license": "MIT"
+}

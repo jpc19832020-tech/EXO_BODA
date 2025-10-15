@@ -1,0 +1,113 @@
+{
+  "couple": {
+    "names": "María & José",
+    "bride": "María González",
+    "groom": "José Martínez"
+  },
+  "wedding": {
+    "date": "2024-12-15T17:00:00",
+    "dateFormatted": "15 de Diciembre, 2024",
+    "hashtag": "#MariaYJoseEternos"
+  },
+  "hero": {
+    "image": "./assets/img/hero.jpg",
+    "showCountdown": true
+  },
+  "story": {
+    "enabled": true,
+    "content": "Nuestra historia comenzó hace 5 años en un café donde ambos coincidimos por casualidad. Desde ese primer momento, supimos que estábamos destinados a estar juntos. Hoy, después de incontables aventuras, risas y momentos inolvidables, celebramos el comienzo de nuestra nueva vida juntos. Gracias por ser parte de este viaje mágico."
+  },
+  "schedule": [
+    {
+      "time": "17:00",
+      "title": "Llegada de los novios",
+      "description": "Comienza la ceremonia civil en un ambiente íntimo y especial"
+    },
+    {
+      "time": "17:30",
+      "title": "Ceremonia religiosa",
+      "description": "Unión sagrada en la hermosa Iglesia San Francisco"
+    },
+    {
+      "time": "19:00",
+      "title": "Cóctel de bienvenida",
+      "description": "Celebración con bebidas y aperitivos en los jardines"
+    },
+    {
+      "time": "20:30",
+      "title": "Cena y recepción",
+      "description": "Banquete gourmet en el salón principal con música en vivo"
+    },
+    {
+      "time": "23:00",
+      "title": "Baile y fiesta",
+      "description": "¡A celebrar hasta el amanecer con los que más amamos!"
+    }
+  ],
+  "ceremony": {
+    "enabled": true,
+    "name": "Iglesia San Francisco",
+    "address": "Calle Principal #123, Ciudad",
+    "datetime": "15 de Diciembre, 2024 - 17:30",
+    "mapLink": "https://maps.google.com/?q=Iglesia+San+Francisco+Calle+Principal+123"
+  },
+  "reception": {
+    "enabled": true,
+    "name": "Salón Jardines del Sol",
+    "address": "Avenida Central #456, Ciudad",
+    "datetime": "15 de Diciembre, 2024 - 19:00",
+    "mapLink": "https://maps.google.com/?q=Salon+Jardines+del+Sol+Avenida+Central+456"
+  },
+  "dresscode": {
+    "enabled": true,
+    "title": "Elegancia Romántica",
+    "description": "Vestimenta formal elegante. Caballeros: traje oscuro con corbata. Damas: vestido largo o coctel sofisticado.",
+    "colors": "Paleta de colores: dorado, champán, rosa blush, marfil y tonos tierra",
+    "restrictions": "Por favor, evitar colores muy llamativos como rojo intenso o negro total."
+  },
+  "maps": {
+    "enabled": true,
+    "showBoth": true
+  },
+  "rsvp": {
+    "enabled": true,
+    "deadline": "2024-11-30",
+    "maxGuestsPerPerson": 2,
+    "googleSheetUrl": "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec",
+    "policy": "Evento para adultos • Agradecemos tu comprensión"
+  },
+  "gifts": {
+    "enabled": true,
+    "registryLink": "https://mesaderegalos.com/maria-y-jose",
+    "cashLink": "https://paypal.me/mariayjose",
+    "message": "Tu presencia es nuestro regalo más preciado. Si deseas honrarnos con un obsequio, aquí tienes algunas opciones que nos ayudarán a construir nuestro futuro juntos."
+  },
+  "gallery": {
+    "enabled": true,
+    "private": false,
+    "images": [
+      "./assets/img/gallery1.jpg",
+      "./assets/img/gallery2.jpg",
+      "./assets/img/gallery3.jpg",
+      "./assets/img/gallery4.jpg",
+      "./assets/img/gallery5.jpg",
+      "./assets/img/gallery6.jpg"
+    ]
+  },
+  "guestbook": {
+    "enabled": true,
+    "googleSheetUrl": "https://script.google.com/macros/s/YOUR_GUESTBOOK_SCRIPT_ID/exec",
+    "message": "Déjanos un mensaje especial que guardaremos en nuestro corazón por siempre. Tus palabras son el mejor regalo que podríamos recibir."
+  },
+  "seo": {
+    "title": "María & José - Nuestra Boda Eterna",
+    "description": "Te invitamos a celebrar nuestra unión el 15 de Diciembre de 2024. Únete a nosotros en este día mágico lleno de amor y alegría.",
+    "image": "./assets/img/hero.jpg"
+  },
+  "theme": {
+    "primaryColor": "#667eea",
+    "secondaryColor": "#764ba2",
+    "textColor": "#ffffff",
+    "accentColor": "#f5f5f0"
+  }
+}

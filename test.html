@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Wedding Site</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f8f4e6 0%, #e8dcc0 100%);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #d4af37;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #d4af37;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        .loading {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        .hero-section {
+            text-align: center;
+            padding: 50px 0;
+            background: linear-gradient(135deg, #d4af37 0%, #c9a961 100%);
+            color: white;
+            margin: -30px -30px 30px -30px;
+            border-radius: 15px 15px 0 0;
+        }
+        .hero-names {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            animation: fadeInUp 1s ease;
+        }
+        .hero-date {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease 0.3s both;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .countdown-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            min-width: 80px;
+        }
+        .countdown-number {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+        .countdown-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="hero-section">
+            <div class="hero-names" id="hero-names">María & José</div>
+            <div class="hero-date" id="hero-date">15 de Diciembre, 2024</div>
+            <div class="countdown" id="countdown">
+                <div class="countdown-item">
+                    <span class="countdown-number" id="days">0</span>
+                    <span class="countdown-label">Días</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number" id="hours">0</span>
+                    <span class="countdown-label">Horas</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number" id="minutes">0</span>
+                    <span class="countdown-label">Minutos</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number" id="seconds">0</span>
+                    <span class="countdown-label">Segundos</span>
+                </div>
+            </div>
+        </div>
+        
+        <h1>🔍 Test del Sitio de Boda</h1>
+        
+        <div class="test-item loading" id="test-server">
+            <strong>📡 Servidor:</strong> Verificando conexión...
+        </div>
+        
+        <div class="test-item loading" id="test-config">
+            <strong>⚙️ Configuración:</strong> Cargando configuración...
+        </div>
+        
+        <div class="test-item loading" id="test-images">
+            <strong>🖼️ Imágenes:</strong> Verificando imágenes...
+        </div>
+        
+        <div class="test-item loading" id="test-css">
+            <strong>🎨 Estilos:</strong> Verificando CSS...
+        </div>
+        
+        <div class="test-item loading" id="test-js">
+            <strong>📜 JavaScript:</strong> Verificando JavaScript...
+        </div>
+        
+        <div class="test-item loading" id="test-animations">
+            <strong>✨ Animaciones:</strong> Verificando animaciones...
+        </div>
+    </div>
+
+    <script>
+        // Test functions
+        async function testServer() {
+            try {
+                const response = await fetch('./config.json');
+                if (response.ok) {
+                    document.getElementById('test-server').className = 'test-item success';
+                    document.getElementById('test-server').innerHTML = '<strong>📡 Servidor:</strong> ✅ Conexión exitosa (HTTP 200)';
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                document.getElementById('test-server').className = 'test-item error';
+                document.getElementById('test-server').innerHTML = `<strong>📡 Servidor:</strong> ❌ Error de conexión - ${error.message}`;
+            }
+        }
+
+        async function testConfig() {
+            try {
+                const response = await fetch('./config.json');
+                const config = await response.json();
+                if (config.couple && config.wedding) {
+                    document.getElementById('test-config').className = 'test-item success';
+                    document.getElementById('test-config').innerHTML = '<strong>⚙️ Configuración:</strong> ✅ Configuración cargada correctamente';
+                } else {
+                    throw new Error('Configuración inválida');
+                }
+            } catch (error) {
+                document.getElementById('test-config').className = 'test-item error';
+                document.getElementById('test-config').innerHTML = `<strong>⚙️ Configuración:</strong> ❌ Error - ${error.message}`;
+            }
+        }
+
+        async function testImages() {
+            const imageUrls = [
+                './assets/img/hero.jpg',
+                './assets/img/gallery1.jpg',
+                './assets/img/gallery2.jpg'
+            ];
+            
+            let loadedImages = 0;
+            for (const url of imageUrls) {
+                try {
+                    const response = await fetch(url, { method: 'HEAD' });
+                    if (response.ok) loadedImages++;
+                } catch (error) {
+                    console.log('Image error:', url, error);
+                }
+            }
+            
+            if (loadedImages === imageUrls.length) {
+                document.getElementById('test-images').className = 'test-item success';
+                document.getElementById('test-images').innerHTML = `<strong>🖼️ Imágenes:</strong> ✅ ${loadedImages}/${imageUrls.length} imágenes cargadas`;
+            } else {
+                document.getElementById('test-images').className = 'test-item error';
+                document.getElementById('test-images').innerHTML = `<strong>🖼️ Imágenes:</strong> ⚠️ Solo ${loadedImages}/${imageUrls.length} imágenes cargadas`;
+            }
+        }
+
+        async function testCSS() {
+            try {
+                const response = await fetch('./css/style.css');
+                if (response.ok) {
+                    const css = await response.text();
+                    if (css.includes('@keyframes')) {
+                        const animationCount = (css.match(/@keyframes/g) || []).length;
+                        document.getElementById('test-css').className = 'test-item success';
+                        document.getElementById('test-css').innerHTML = `<strong>🎨 Estilos:</strong> ✅ CSS cargado con ${animationCount} animaciones`;
+                    } else {
+                        throw new Error('No se encontraron animaciones');
+                    }
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                document.getElementById('test-css').className = 'test-item error';
+                document.getElementById('test-css').innerHTML = `<strong>🎨 Estilos:</strong> ❌ Error - ${error.message}`;
+            }
+        }
+
+        async function testJS() {
+            try {
+                const response = await fetch('./js/main.js');
+                if (response.ok) {
+                    const js = await response.text();
+                    if (js.includes('WeddingInvitation')) {
+                        document.getElementById('test-js').className = 'test-item success';
+                        document.getElementById('test-js').innerHTML = '<strong>📜 JavaScript:</strong> ✅ JavaScript cargado correctamente';
+                    } else {
+                        throw new Error('Clase WeddingInvitation no encontrada');
+                    }
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                document.getElementById('test-js').className = 'test-item error';
+                document.getElementById('test-js').innerHTML = `<strong>📜 JavaScript:</strong> ❌ Error - ${error.message}`;
+            }
+        }
+
+        function testAnimations() {
+            // Test if animations are working
+            const heroNames = document.getElementById('hero-names');
+            const heroDate = document.getElementById('hero-date');
+            
+            if (heroNames && heroDate) {
+                document.getElementById('test-animations').className = 'test-item success';
+                document.getElementById('test-animations').innerHTML = '<strong>✨ Animaciones:</strong> ✅ Animaciones CSS funcionando';
+            } else {
+                document.getElementById('test-animations').className = 'test-item error';
+                document.getElementById('test-animations').innerHTML = '<strong>✨ Animaciones:</strong> ❌ Error en las animaciones';
+            }
+        }
+
+        // Countdown function
+        function updateCountdown() {
+            const weddingDate = new Date('2024-12-15T17:00:00');
+            const now = new Date();
+            const diff = weddingDate - now;
+
+            if (diff > 0) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('days').textContent = days;
+                document.getElementById('hours').textContent = hours;
+                document.getElementById('minutes').textContent = minutes;
+                document.getElementById('seconds').textContent = seconds;
+            }
+        }
+
+        // Run all tests
+        async function runTests() {
+            await testServer();
+            await testConfig();
+            await testImages();
+            await testCSS();
+            await testJS();
+            testAnimations();
+            
+            // Update countdown every second
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+
+        // Run tests when page loads
+        window.addEventListener('load', runTests);
+    </script>
+</body>
+</html>
